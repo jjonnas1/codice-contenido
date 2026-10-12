@@ -22,3 +22,5 @@ La app descarga `codice-contenido.json` en segundo plano y lo aplica la siguient
 | `concursos` | Preguntas por paquete: `{ "rama": [...], "procuraduria": [...] }` |
 | `corregir` | `{ "id": "...", campos que cambian }` |
 | `retirar` | Ids de preguntas que se quitan del juego |
+| `terminos` | Términos procesales para el juego «Términos» (desde la versión 1.1.0 de la app): `{ "id", "area", "actuacion", "plazo", "opciones"?, "nota"?, "article", "source", "sourceUrl" }`. El juego aparece con 10 o más. |
+| `concursoInfo` | Datos que cambian de cada concurso (desde la 1.1.0): `{ "procuraduria": { "fecha": "AAAA-MM-DD", "estado": "..." } }`. Con `fecha`, la app muestra la cuenta regresiva y programa avisos. Solo fechas oficiales. |
