@@ -28,6 +28,11 @@
   #aviso { font-size:14px; color:var(--muted); min-height:20px; margin-bottom:16px; }
   footer { margin-top:28px; font-size:13px; color:var(--muted); }
   footer a { color:var(--cream); }
+  #invita { display:none; border:1.5px dashed rgba(245,240,230,.55); border-radius:16px; padding:18px 16px; margin:0 0 22px; }
+  #invita p { margin:0 0 10px; color:var(--cream); }
+  #invita strong { display:block; font-size:34px; letter-spacing:6px; margin:4px 0 12px; }
+  #copiar { font:inherit; font-size:15px; font-weight:600; padding:10px 18px; border-radius:22px; border:0; background:var(--cream); color:var(--navy); cursor:pointer; }
+  #copiar:focus-visible, a.tienda:focus-visible { outline:3px solid #9fb4ff; outline-offset:3px; }
 </style>
 </head>
 <body>
@@ -35,6 +40,11 @@
   <img class="icono" src="icono.png" alt="Ícono de El Códice">
   <h1>El Códice: Derecho Colombiano</h1>
   <p>Trivia de derecho colombiano para estudiantes, abogados y concursos públicos. Cada pregunta cita el artículo y la norma oficial.</p>
+  <div id="invita" role="region" aria-label="Código de invitación">
+    <p>Te invitaron a El Códice. Al abrir la app, escribe este código y recibes días de El Códice Pro gratis:</p>
+    <strong id="codigo"></strong>
+    <button id="copiar" type="button">Copiar código</button>
+  </div>
   <div id="aviso"></div>
   <a class="tienda" id="ios" href="https://apps.apple.com/co/app/id6821622863">Descargar en el App Store (iPhone)</a>
   <a class="tienda" id="android" href="https://play.google.com/store/apps/details?id=com.castellanosabogados.elcodice">Descargar en Google Play (Android)</a>
@@ -47,10 +57,19 @@
     var android = /Android/i.test(ua);
     var bot = /facebookexternalhit|Facebot|bot|crawler|spider|preview/i.test(ua);
     var a = document.getElementById('ios'), b = document.getElementById('android');
+    var m = /[?&]ref=([A-Za-z0-9]{4,8})/.exec(location.search), ref = m ? m[1].toUpperCase() : '';
+    function copiar() { try { navigator.clipboard && navigator.clipboard.writeText(ref); } catch (e) {} }
+    if (ref) {
+      document.getElementById('codigo').textContent = ref;
+      document.getElementById('invita').style.display = 'block';
+      document.getElementById('copiar').onclick = function () { copiar(); this.textContent = 'Copiado ✓'; };
+      a.onclick = b.onclick = copiar;
+      b.href += '&referrer=' + encodeURIComponent('ref=' + ref);
+    }
     if (ios) { b.className += ' sec'; a.parentNode.insertBefore(a, b); }
     else if (android) { a.className += ' sec'; b.parentNode.insertBefore(b, a); }
     else { b.className += ' sec'; return; }
-    if (bot) return;
+    if (bot || ref) return;
     document.getElementById('aviso').textContent = 'Abriendo la tienda…';
     setTimeout(function () { location.href = ios ? a.href : b.href; }, 400);
   })();
