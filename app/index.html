@@ -58,13 +58,16 @@
     var bot = /facebookexternalhit|Facebot|bot|crawler|spider|preview/i.test(ua);
     var a = document.getElementById('ios'), b = document.getElementById('android');
     var m = /[?&]ref=([A-Za-z0-9]{4,8})/.exec(location.search), ref = m ? m[1].toUpperCase() : '';
+    // Canal de origen para medir de dónde vienen las descargas (?ct=instagram, ?ct=whatsapp, ?ct=correo...).
+    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : 'pagina');
+    a.href = 'https://apps.apple.com/co/app/id6821622863?pt=129597931&ct=' + ct + '&mt=8';
+    b.href += '&referrer=' + encodeURIComponent('utm_source=' + ct + '&utm_medium=enlace&utm_campaign=elcodice' + (ref ? '&ref=' + ref : ''));
     function copiar() { try { navigator.clipboard && navigator.clipboard.writeText(ref); } catch (e) {} }
     if (ref) {
       document.getElementById('codigo').textContent = ref;
       document.getElementById('invita').style.display = 'block';
       document.getElementById('copiar').onclick = function () { copiar(); this.textContent = 'Copiado ✓'; };
       a.onclick = b.onclick = copiar;
-      b.href += '&referrer=' + encodeURIComponent('ref=' + ref);
     }
     if (ios) { b.className += ' sec'; a.parentNode.insertBefore(a, b); }
     else if (android) { a.className += ' sec'; b.parentNode.insertBefore(b, a); }
