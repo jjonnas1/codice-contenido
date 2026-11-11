@@ -62,7 +62,19 @@
     var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : 'pagina');
     a.href = 'https://apps.apple.com/co/app/id6821622863?pt=129597931&ct=' + ct + '&mt=8';
     b.href += '&referrer=' + encodeURIComponent('utm_source=' + ct + '&utm_medium=enlace&utm_campaign=elcodice' + (ref ? '&ref=' + ref : ''));
+    // Contador de visitas: anota cada apertura y cada salida a la tienda en la pestaña «Visitas» de la hoja de referidos.
+    var pl = ios ? 'ios' : (android ? 'android' : 'otra');
+    function contar(ev) {
+      if (bot) return;
+      try {
+        fetch('https://script.google.com/macros/s/AKfycbwJUr-Eg83OElAni_EyEvmgc4XRUdWbiXHgezplyWjsXjlwuXA6dSEF6BABmNaTMAlPnQ/exec?v=1&ev=' + ev +
+          '&ct=' + encodeURIComponent(ct) + '&pl=' + pl + '&ref=' + ref, { mode: 'no-cors', keepalive: true });
+      } catch (e) {}
+    }
+    contar('abre');
     function copiar() { try { navigator.clipboard && navigator.clipboard.writeText(ref); } catch (e) {} }
+    a.addEventListener('click', function () { contar('toca_appstore'); });
+    b.addEventListener('click', function () { contar('toca_googleplay'); });
     if (ref) {
       document.getElementById('codigo').textContent = ref;
       document.getElementById('invita').style.display = 'block';
@@ -74,7 +86,7 @@
     else { b.className += ' sec'; return; }
     if (bot || ref) return;
     document.getElementById('aviso').textContent = 'Abriendo la tienda…';
-    setTimeout(function () { location.href = ios ? a.href : b.href; }, 400);
+    setTimeout(function () { contar(ios ? 'va_appstore' : 'va_googleplay'); location.href = ios ? a.href : b.href; }, 400);
   })();
 </script>
 </body>
