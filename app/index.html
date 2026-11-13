@@ -32,6 +32,11 @@
   #invita p { margin:0 0 10px; color:var(--cream); }
   #invita strong { display:block; font-size:34px; letter-spacing:6px; margin:4px 0 12px; }
   #copiar { font:inherit; font-size:15px; font-weight:600; padding:10px 18px; border-radius:22px; border:0; background:var(--cream); color:var(--navy); cursor:pointer; }
+  #duelo { display:none; border:1.5px dashed rgba(245,240,230,.55); border-radius:16px; padding:18px 16px; margin:0 0 22px; }
+  #duelo p { margin:0 0 10px; color:var(--cream); }
+  #duelo p.nota { margin:12px 0 0; color:var(--muted); font-size:14px; }
+  #duelo strong { display:block; font-size:34px; letter-spacing:6px; margin:4px 0 14px; }
+  #duelo a.tienda { margin:0; }
   #copiar:focus-visible, a.tienda:focus-visible { outline:3px solid #9fb4ff; outline-offset:3px; }
 </style>
 </head>
@@ -45,6 +50,12 @@
     <strong id="codigo"></strong>
     <button id="copiar" type="button">Copiar código</button>
   </div>
+  <div id="duelo" role="region" aria-label="Duelo">
+    <p id="dueloTexto">Te retaron a un duelo de derecho colombiano: las mismas 10 preguntas, gana quien saque más puntos.</p>
+    <strong id="dueloCodigo"></strong>
+    <a class="tienda" id="abrirApp" href="#">Ya tengo la app: abrir el duelo</a>
+    <p class="nota">¿No la tienes? Descárgala gratis abajo, entra a «Duelo» y escribe el código.</p>
+  </div>
   <div id="aviso"></div>
   <a class="tienda" id="ios" href="https://apps.apple.com/co/app/id6821622863">Descargar en el App Store (iPhone)</a>
   <a class="tienda" id="android" href="https://play.google.com/store/apps/details?id=com.castellanosabogados.elcodice">Descargar en Google Play (Android)</a>
@@ -57,9 +68,10 @@
     var android = /Android/i.test(ua);
     var bot = /facebookexternalhit|Facebot|bot|crawler|spider|preview/i.test(ua);
     var a = document.getElementById('ios'), b = document.getElementById('android');
+    var dm = /[?&]duelo=([A-Za-z0-9]{6})/.exec(location.search), duelo = dm ? dm[1].toUpperCase() : '';
     var m = /[?&]ref=([A-Za-z0-9]{4,8})/.exec(location.search), ref = m ? m[1].toUpperCase() : '';
     // Canal de origen para medir de dónde vienen las descargas (?ct=instagram, ?ct=whatsapp, ?ct=correo...).
-    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : 'pagina');
+    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : duelo ? 'duelo' : 'pagina');
     a.href = 'https://apps.apple.com/co/app/id6821622863?pt=129597931&ct=' + ct + '&mt=8';
     b.href += '&referrer=' + encodeURIComponent('utm_source=' + ct + '&utm_medium=enlace&utm_campaign=elcodice' + (ref ? '&ref=' + ref : ''));
     // Contador de visitas: anota cada apertura y cada salida a la tienda en la pestaña «Visitas» de la hoja de referidos.
@@ -81,10 +93,18 @@
       document.getElementById('copiar').onclick = function () { copiar(); this.textContent = 'Copiado ✓'; };
       a.onclick = b.onclick = copiar;
     }
+    if (duelo) {
+      document.getElementById('dueloCodigo').textContent = duelo;
+      document.getElementById('duelo').style.display = 'block';
+      var abrir = document.getElementById('abrirApp');
+      abrir.href = 'elcodice://duelo/' + duelo;
+      abrir.addEventListener('click', function () { contar('abre_duelo'); });
+      a.onclick = b.onclick = function () { try { navigator.clipboard && navigator.clipboard.writeText(duelo); } catch (e) {} };
+    }
     if (ios) { b.className += ' sec'; a.parentNode.insertBefore(a, b); }
     else if (android) { a.className += ' sec'; b.parentNode.insertBefore(b, a); }
     else { b.className += ' sec'; return; }
-    if (bot || ref) return;
+    if (bot || ref || duelo) return;
     document.getElementById('aviso').textContent = 'Abriendo la tienda…';
     setTimeout(function () { contar(ios ? 'va_appstore' : 'va_googleplay'); location.href = ios ? a.href : b.href; }, 400);
   })();
