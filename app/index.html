@@ -36,7 +36,10 @@
   #duelo p { margin:0 0 10px; color:var(--cream); }
   #duelo p.nota { margin:12px 0 0; color:var(--muted); font-size:14px; }
   #duelo strong { display:block; font-size:34px; letter-spacing:6px; margin:4px 0 14px; }
-  #duelo a.tienda { margin:0; }
+  #duelo a.tienda, #amigo a.tienda { margin:0; }
+  #amigo { display:none; border:1.5px dashed rgba(245,240,230,.55); border-radius:16px; padding:18px 16px; margin:0 0 22px; }
+  #amigo p { margin:0 0 14px; color:var(--cream); }
+  #amigo p.nota { margin:12px 0 0; color:var(--muted); font-size:14px; }
   #copiar:focus-visible, a.tienda:focus-visible { outline:3px solid #9fb4ff; outline-offset:3px; }
 </style>
 </head>
@@ -56,6 +59,11 @@
     <a class="tienda" id="abrirApp" href="#">Ya tengo la app: abrir el duelo</a>
     <p class="nota">¿No la tienes? Descárgala gratis abajo, entra a «Duelo» y escribe el código.</p>
   </div>
+  <div id="amigo" role="region" aria-label="Invitación de compañero">
+    <p>Te invitaron a ser compañero de estudio en El Códice: duelos de derecho colombiano y una liga semanal entre amigos.</p>
+    <a class="tienda" id="abrirAmigo" href="#">Ya tengo la app: agregarlo</a>
+    <p class="nota">¿No la tienes? Descárgala gratis abajo, elige tu apodo en la pestaña «Amigos» y vuelve a abrir este enlace.</p>
+  </div>
   <div id="aviso"></div>
   <a class="tienda" id="ios" href="https://apps.apple.com/co/app/id6821622863">Descargar en el App Store (iPhone)</a>
   <a class="tienda" id="android" href="https://play.google.com/store/apps/details?id=com.castellanosabogados.elcodice">Descargar en Google Play (Android)</a>
@@ -70,8 +78,9 @@
     var a = document.getElementById('ios'), b = document.getElementById('android');
     var dm = /[?&]duelo=([A-Za-z0-9]{6})/.exec(location.search), duelo = dm ? dm[1].toUpperCase() : '';
     var m = /[?&]ref=([A-Za-z0-9]{4,8})/.exec(location.search), ref = m ? m[1].toUpperCase() : '';
+    var am = /[?&]amigo=([A-Za-z0-9]{6})/.exec(location.search), amigo = am ? am[1].toUpperCase() : '';
     // Canal de origen para medir de dónde vienen las descargas (?ct=instagram, ?ct=whatsapp, ?ct=correo...).
-    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : duelo ? 'duelo' : 'pagina');
+    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : duelo ? 'duelo' : amigo ? 'amigo' : 'pagina');
     a.href = 'https://apps.apple.com/co/app/id6821622863?pt=129597931&ct=' + ct + '&mt=8';
     b.href += '&referrer=' + encodeURIComponent('utm_source=' + ct + '&utm_medium=enlace&utm_campaign=elcodice' + (ref ? '&ref=' + ref : ''));
     // Contador de visitas: anota cada apertura y cada salida a la tienda en la pestaña «Visitas» de la hoja de referidos.
@@ -101,10 +110,16 @@
       abrir.addEventListener('click', function () { contar('abre_duelo'); });
       a.onclick = b.onclick = function () { try { navigator.clipboard && navigator.clipboard.writeText(duelo); } catch (e) {} };
     }
+    if (amigo) {
+      document.getElementById('amigo').style.display = 'block';
+      var abrirA = document.getElementById('abrirAmigo');
+      abrirA.href = 'elcodice://amigo/' + amigo;
+      abrirA.addEventListener('click', function () { contar('abre_amigo'); });
+    }
     if (ios) { b.className += ' sec'; a.parentNode.insertBefore(a, b); }
     else if (android) { a.className += ' sec'; b.parentNode.insertBefore(b, a); }
     else { b.className += ' sec'; return; }
-    if (bot || ref || duelo) return;
+    if (bot || ref || duelo || amigo) return;
     document.getElementById('aviso').textContent = 'Abriendo la tienda…';
     setTimeout(function () { contar(ios ? 'va_appstore' : 'va_googleplay'); location.href = ios ? a.href : b.href; }, 400);
   })();
