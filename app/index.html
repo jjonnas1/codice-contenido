@@ -36,7 +36,10 @@
   #duelo p { margin:0 0 10px; color:var(--cream); }
   #duelo p.nota { margin:12px 0 0; color:var(--muted); font-size:14px; }
   #duelo strong { display:block; font-size:34px; letter-spacing:6px; margin:4px 0 14px; }
-  #duelo a.tienda, #amigo a.tienda { margin:0; }
+  #duelo a.tienda, #amigo a.tienda, #grupo a.tienda { margin:0; }
+  #grupo { display:none; border:1.5px dashed rgba(245,240,230,.55); border-radius:16px; padding:18px 16px; margin:0 0 22px; }
+  #grupo p { margin:0 0 14px; color:var(--cream); }
+  #grupo p.nota { margin:12px 0 0; color:var(--muted); font-size:14px; }
   #amigo { display:none; border:1.5px dashed rgba(245,240,230,.55); border-radius:16px; padding:18px 16px; margin:0 0 22px; }
   #amigo p { margin:0 0 14px; color:var(--cream); }
   #amigo p.nota { margin:12px 0 0; color:var(--muted); font-size:14px; }
@@ -64,6 +67,11 @@
     <a class="tienda" id="abrirAmigo" href="#">Ya tengo la app: agregarlo</a>
     <p class="nota">¿No la tienes? Descárgala gratis abajo, elige tu apodo en la pestaña «Amigos» y vuelve a abrir este enlace.</p>
   </div>
+  <div id="grupo" role="region" aria-label="Invitación a un grupo de estudio">
+    <p>Te invitaron a un grupo de estudio en El Códice: liga semanal privada y duelos de derecho colombiano. Código del grupo: <strong id="codigoGrupo"></strong></p>
+    <a class="tienda" id="abrirGrupo" href="#">Ya tengo la app: unirme</a>
+    <p class="nota">¿No la tienes? Descárgala gratis abajo, elige tu apodo en la pestaña «Amigos» y vuelve a abrir este enlace (o escribe el código en «Grupos de estudio»).</p>
+  </div>
   <div id="aviso"></div>
   <a class="tienda" id="ios" href="https://apps.apple.com/co/app/id6821622863">Descargar en el App Store (iPhone)</a>
   <a class="tienda" id="android" href="https://play.google.com/store/apps/details?id=com.castellanosabogados.elcodice">Descargar en Google Play (Android)</a>
@@ -79,8 +87,9 @@
     var dm = /[?&]duelo=([A-Za-z0-9]{6})/.exec(location.search), duelo = dm ? dm[1].toUpperCase() : '';
     var m = /[?&]ref=([A-Za-z0-9]{4,8})/.exec(location.search), ref = m ? m[1].toUpperCase() : '';
     var am = /[?&]amigo=([A-Za-z0-9]{6})/.exec(location.search), amigo = am ? am[1].toUpperCase() : '';
+    var gr = /[?&]grupo=([A-Za-z0-9]{6})/.exec(location.search), grupo = gr ? gr[1].toUpperCase() : '';
     // Canal de origen para medir de dónde vienen las descargas (?ct=instagram, ?ct=whatsapp, ?ct=correo...).
-    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : duelo ? 'duelo' : amigo ? 'amigo' : 'pagina');
+    var c = /[?&]ct=([A-Za-z0-9_-]{2,30})/.exec(location.search), ct = c ? c[1].toLowerCase() : (ref ? 'invitacion' : duelo ? 'duelo' : amigo ? 'amigo' : grupo ? 'grupo' : 'pagina');
     a.href = 'https://apps.apple.com/co/app/id6821622863?pt=129597931&ct=' + ct + '&mt=8';
     b.href += '&referrer=' + encodeURIComponent('utm_source=' + ct + '&utm_medium=enlace&utm_campaign=elcodice' + (ref ? '&ref=' + ref : ''));
     // Contador de visitas: anota cada apertura y cada salida a la tienda en la pestaña «Visitas» de la hoja de referidos.
@@ -116,10 +125,17 @@
       abrirA.href = 'elcodice://amigo/' + amigo;
       abrirA.addEventListener('click', function () { contar('abre_amigo'); });
     }
+    if (grupo) {
+      document.getElementById('grupo').style.display = 'block';
+      document.getElementById('codigoGrupo').textContent = grupo;
+      var abrirG = document.getElementById('abrirGrupo');
+      abrirG.href = 'elcodice://grupo/' + grupo;
+      abrirG.addEventListener('click', function () { contar('abre_grupo'); });
+    }
     if (ios) { b.className += ' sec'; a.parentNode.insertBefore(a, b); }
     else if (android) { a.className += ' sec'; b.parentNode.insertBefore(b, a); }
     else { b.className += ' sec'; return; }
-    if (bot || ref || duelo || amigo) return;
+    if (bot || ref || duelo || amigo || grupo) return;
     document.getElementById('aviso').textContent = 'Abriendo la tienda…';
     setTimeout(function () { contar(ios ? 'va_appstore' : 'va_googleplay'); location.href = ios ? a.href : b.href; }, 400);
   })();
